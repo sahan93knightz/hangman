@@ -1,6 +1,8 @@
 package com.iit.sahan2015145.hangman.ui;
 
 import com.iit.sahan2015145.hangman.actions.TryButtonAction;
+import com.iit.sahan2015145.hangman.actions.Viewable;
+import com.iit.sahan2015145.hangman.core.WordProcessor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,8 +10,9 @@ import java.awt.*;
 /**
  * Created by sahan on 11/14/15.
  */
-public class MainFrame extends JFrame {
+public class MainFrame extends JFrame implements Viewable {
 
+    private static final WordProcessor WORD_PROCESSOR = WordProcessor.getInstance(2);
     private final String word;
     private JLabel lblImage;
     private JLabel lblWord;
@@ -21,7 +24,12 @@ public class MainFrame extends JFrame {
         super("Hangman - Guess the word");
         this.word = word;
         initUI();
+        newWord();
+    }
 
+    private void newWord() {
+        WORD_PROCESSOR.newWord(word);
+        lblWord.setText(WORD_PROCESSOR.getTextToDisplay());
     }
 
     private void initUI() {
@@ -30,13 +38,13 @@ public class MainFrame extends JFrame {
         JPanel rightPanel = new JPanel(new GridLayout(1, 1, 5, 5));
 
         lblImage = new JLabel("IMAGE");
-        lblWord = new JLabel("XXXXXXX", JLabel.CENTER);
+        lblWord = new JLabel("", JLabel.CENTER);
         lblTries = new JLabel("0");
         btnTry = new JButton("Try Letter");
         txtWord = new JTextField();
         txtWord.setHorizontalAlignment(JTextField.CENTER);
 
-        TryButtonAction tryButtonAction = new TryButtonAction();
+        TryButtonAction tryButtonAction = new TryButtonAction(this);
 
         btnTry.addActionListener(tryButtonAction);
         txtWord.addActionListener(tryButtonAction);
@@ -57,5 +65,27 @@ public class MainFrame extends JFrame {
         setSize(400, 400);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+    }
+
+    @Override
+    public String getGuessedText() {
+        return txtWord.getText();
+    }
+
+    @Override
+    public void showResult(String word, String message, String tries, String imgUrl) {
+        lblWord.setText(word);
+        lblTries.setText(tries);
+        txtWord.setText(null);
+    }
+
+    @Override
+    public void end(int result) {
+        if (result == WORD_PROCESSOR.WON) {
+            JOptionPane.showMessageDialog(this, "You Won!");
+        } else {
+            JOptionPane.showMessageDialog(this, "You Loose!");
+
+        }
     }
 }
